@@ -12,7 +12,7 @@ fun main() {
     transaction(db.conn) {
         // Admin
         User.insert {
-            it[email] = "admin"
+            it[username] = "admin"
             it[password] = argon2.hash("admin")
             it[role] = UserRole.Admin
             it[name] = "Admin"
@@ -20,7 +20,7 @@ fun main() {
 
         // Waiters
         User.insert {
-            it[email] = "waiters"
+            it[username] = "waiters"
             it[password] = argon2.hash("waiters")
             it[role] = UserRole.Waiters
             it[name] = "Waiters"
@@ -28,7 +28,7 @@ fun main() {
 
         // Cashiers
         User.insert {
-            it[email] = "cashier"
+            it[username] = "cashier"
             it[password] = argon2.hash("cashier")
             it[role] = UserRole.Cashier
             it[name] = "Cashier"
@@ -36,7 +36,7 @@ fun main() {
 
         // Chefs
         User.insert {
-            it[email] = "chef"
+            it[username] = "chef"
             it[password] = argon2.hash("chef")
             it[role] = UserRole.Chef
             it[name] = "Chef"

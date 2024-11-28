@@ -10,6 +10,9 @@ import casigma.composeapp.generated.resources.Res
 import casigma.composeapp.generated.resources.routes_login
 import casigma.composeapp.generated.resources.routes_waiters_order_list_screen
 import casigma.composeapp.generated.resources.routes_waiters_record_order_screen
+import dev.pbt.casigma.modules.database.Database
+import dev.pbt.casigma.modules.providers.Argon2
+import dev.pbt.casigma.modules.providers.Auth
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import dev.pbt.casigma.ui.components.TopBar
@@ -21,6 +24,7 @@ import dev.pbt.casigma.ui.screen.waiters.RecordOrderScreen
 import org.jetbrains.compose.resources.StringResource
 import org.koin.compose.KoinApplication
 import org.koin.compose.getKoin
+import org.koin.compose.koinInject
 import org.koin.core.component.getScopeId
 import org.koin.core.component.getScopeName
 import org.koin.core.context.startKoin
@@ -44,6 +48,9 @@ fun App() {
     KoinApplication(application = {
         val mainModules = module {
             single { navController }
+            single { Argon2() }
+            single { Database() }
+            factory { Auth(get(), get()) }
         }
 
         val screens = module {
@@ -55,11 +62,17 @@ fun App() {
         modules(mainModules, screens)
     }) {
         val koin = getKoin()
+        val authProvider = koinInject<Auth>()
         AppTheme {
             Scaffold(
-//                topBar = { TopBar() }
+                topBar = {
+                    val authenticatedUser by authProvider::authenticatedUser
+                    if (authenticatedUser.value !== null) {
+                        TopBar()
+                    }
+                }
             ) {
-                NavHost(navController = navController, startDestination = AppScreen.WaitersRecordOrder.name) {
+                NavHost(navController = navController, startDestination = AppScreen.Login.name) {
                     AppScreen.entries.forEach {
                         val screen = koin.get<ScreenBase>(qualifier = named(it))
                         composable(screen.route) {

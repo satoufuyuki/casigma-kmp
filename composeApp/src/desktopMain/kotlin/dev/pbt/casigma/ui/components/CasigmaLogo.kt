@@ -15,9 +15,9 @@ import casigma.composeapp.generated.resources.casigma_logo
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun CasigmaLogo(includeText: Boolean = true, size: Int = 48, theme: Color) {
+fun CasigmaLogo(includeText: Boolean = true, size: Int = 48, theme: Color, modifier: Modifier? = null) {
     return Row(
-        modifier = Modifier.fillMaxHeight().padding(24.dp, 0.dp, 24.dp, 0.dp),
+        modifier = modifier ?: Modifier.fillMaxHeight().padding(24.dp, 0.dp, 24.dp, 0.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {
