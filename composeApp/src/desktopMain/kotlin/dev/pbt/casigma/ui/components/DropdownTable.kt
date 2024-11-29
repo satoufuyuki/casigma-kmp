@@ -16,28 +16,45 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun DropdownTable(table: List<String>) {
+fun DropdownTable(
+    tables: List<String>,
+    currentTableIndex: Int,
+    onTableSelected: (Int) -> Unit
+) {
     val isDropDownExpanded = remember { mutableStateOf(false) }
+    val currentTable = tables.getOrNull(currentTableIndex)
 
     return Box {
         TextButton(onClick = { isDropDownExpanded.value = true }) {
             Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
-                Text("Table 1", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, fontSize = 25.sp)
+                Text(if (currentTableIndex == -1) "Select Table" else "Table $currentTable" , style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, fontSize = 25.sp)
                 Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Localized description")
             }
         }
         DropdownMenu(expanded = isDropDownExpanded.value, onDismissRequest = { isDropDownExpanded.value = false }) {
-            table.forEachIndexed { index, table ->
+            if (tables.isEmpty()) {
                 DropdownMenuItem(
                     text = { Text(
-                        table,
+                        "No tables available",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp
+                    ) },
+                    onClick = { }
+                )
+                return@DropdownMenu
+            }
+            tables.forEachIndexed { index, table ->
+                DropdownMenuItem(
+                    text = { Text(
+                        "Table $table",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         fontSize = 20.sp
                     ) },
                     onClick = {
                         isDropDownExpanded.value = false
-
+                        onTableSelected(index)
                     }
                 )
                 if (index < table.length - 1) {

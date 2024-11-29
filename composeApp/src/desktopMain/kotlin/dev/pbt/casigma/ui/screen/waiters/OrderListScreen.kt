@@ -65,7 +65,7 @@ class OrderListScreen(override val route: String): ScreenBase(route) {
                         fontWeight = FontWeight.Medium,
                         fontSize = 40.sp
                     )
-                    DropdownTable(mockData)
+//                    DropdownTable(mockData)
                 }
                 Row (
                     verticalAlignment = Alignment.CenterVertically,

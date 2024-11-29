@@ -17,12 +17,24 @@ import androidx.compose.ui.unit.sp
 import casigma.composeapp.generated.resources.Res
 import casigma.composeapp.generated.resources.chicken_steak
 import casigma.composeapp.generated.resources.remove
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import dev.pbt.casigma.modules.utils.TextUtils
 import dev.pbt.casigma.ui.theme.white
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun MenuCard() {
+fun MenuCard(
+    image: String,
+    name: String,
+    price: Float,
+    quantity: Int,
+    onAdd: () -> Unit,
+    onRemove: () -> Unit
+) {
     return OutlinedCard(
         colors = CardColors(
             containerColor = white,
@@ -37,21 +49,24 @@ fun MenuCard() {
             verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
             modifier = Modifier.padding(top = 16.dp)
         ) {
-            Image(
-                bitmap = imageResource(Res.drawable.chicken_steak),
-                contentDescription = "Chicken Steak",
-                alignment = Alignment.Center,
+            AsyncImage(
+                model = ImageRequest.Builder(LocalPlatformContext.current)
+                    .data(image)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = name,
+                modifier = Modifier.height(160.dp),
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.height(160.dp)
+                alignment = Alignment.Center
             )
             Text(
-                "Chicken Steak",
+                name,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 fontSize = 24.sp
             )
             Text(
-                "Rp15.000",
+                TextUtils.formatRupiah(price),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = Color.Gray,
@@ -64,7 +79,7 @@ fun MenuCard() {
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp)
             ) {
                 IconButton(
-                    onClick = { /*TODO*/ },
+                    onClick = onRemove,
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.remove),
@@ -72,13 +87,13 @@ fun MenuCard() {
                     )
                 }
                 Text(
-                    "1",
+                    quantity.toString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black
                 )
                 IconButton(
-                    onClick = { /*TODO*/ },
+                    onClick = onAdd,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,

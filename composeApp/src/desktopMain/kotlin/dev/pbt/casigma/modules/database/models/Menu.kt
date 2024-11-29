@@ -3,6 +3,16 @@ package dev.pbt.casigma.modules.database.models
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
+import java.time.LocalDateTime
+
+data class MenuObject(
+    val id: Int,
+    val name: String,
+    val price: Float,
+    val category: MenuCategory,
+    val image: String,
+    val createdAt: LocalDateTime
+)
 
 enum class MenuCategory(val category: String) {
     Food("food"),

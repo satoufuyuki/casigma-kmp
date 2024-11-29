@@ -15,7 +15,6 @@ fun main() = application {
         resizable = false,
 //        undecorated = true
     ) {
-        MenuBar(this, this@application)
-        App()
+        App(this, this@application)
     }
 }

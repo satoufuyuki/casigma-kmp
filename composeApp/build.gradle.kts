@@ -32,6 +32,10 @@ kotlin {
             implementation("org.mariadb.jdbc:mariadb-java-client:3.5.0")
             implementation("com.mysql:mysql-connector-j:9.1.0")
 
+            // Coil
+            implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+            implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
+
             // Koin
             val koinVersion = "4.0.0"
             implementation("io.insert-koin:koin-compose:$koinVersion")

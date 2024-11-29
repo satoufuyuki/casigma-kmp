@@ -2,6 +2,9 @@ package dev.pbt.casigma
 
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.ui.window.ApplicationScope
+import androidx.compose.ui.window.FrameWindowScope
+import androidx.compose.ui.window.WindowScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,9 +13,13 @@ import casigma.composeapp.generated.resources.Res
 import casigma.composeapp.generated.resources.routes_login
 import casigma.composeapp.generated.resources.routes_waiters_order_list_screen
 import casigma.composeapp.generated.resources.routes_waiters_record_order_screen
+import com.apple.eawt.Application
 import dev.pbt.casigma.modules.database.Database
+import dev.pbt.casigma.modules.database.models.UserObject
 import dev.pbt.casigma.modules.providers.Argon2
 import dev.pbt.casigma.modules.providers.Auth
+import dev.pbt.casigma.modules.utils.OrderUtils
+import dev.pbt.casigma.ui.components.MenuBar
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import dev.pbt.casigma.ui.components.TopBar
@@ -42,36 +49,42 @@ enum class AppScreen(val title: StringResource) {
 
 @Composable
 @Preview
-fun App() {
+fun App(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
     val navController: NavHostController = rememberNavController()
+    var authenticatedUser: MutableState<UserObject?> = remember { mutableStateOf(null) }
 
     KoinApplication(application = {
         val mainModules = module {
             single { navController }
+            single { authenticatedUser }
             single { Argon2() }
             single { Database() }
-            factory { Auth(get(), get()) }
+            factory { Auth(get(), get(), get()) }
+            factory { OrderUtils(get()) }
         }
 
         val screens = module {
             factory<ScreenBase>(named(AppScreen.Login)) { LoginScreen(AppScreen.Login.name) }
             factory<ScreenBase>(named(AppScreen.WaitersOrderList)) { OrderListScreen(AppScreen.WaitersOrderList.name) }
-            factory<ScreenBase>(named(AppScreen.WaitersRecordOrder)) { RecordOrderScreen(AppScreen.WaitersRecordOrder.name) }
+            factory<ScreenBase>(named(AppScreen.WaitersRecordOrder)) { RecordOrderScreen(
+                AppScreen.WaitersRecordOrder.name,
+                get(),
+                get()
+            ) }
         }
 
         modules(mainModules, screens)
     }) {
         val koin = getKoin()
-        val authProvider = koinInject<Auth>()
         AppTheme {
             Scaffold(
                 topBar = {
-                    val authenticatedUser by authProvider::authenticatedUser
                     if (authenticatedUser.value !== null) {
                         TopBar()
                     }
                 }
             ) {
+                MenuBar(windowScope, applicationScope)
                 NavHost(navController = navController, startDestination = AppScreen.Login.name) {
                     AppScreen.entries.forEach {
                         val screen = koin.get<ScreenBase>(qualifier = named(it))
