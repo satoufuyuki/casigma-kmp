@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import dev.pbt.casigma.AppScreen
+import dev.pbt.casigma.modules.database.models.UserObject
+import dev.pbt.casigma.modules.database.models.UserRole
 import dev.pbt.casigma.modules.providers.Auth
 import dev.pbt.casigma.modules.providers.DialogProvider
 import dev.pbt.casigma.modules.utils.AlertUtils
@@ -38,6 +41,7 @@ import org.koin.compose.koinInject
 class LoginScreen(override val route: String): ScreenBase(route) {
     @Composable
     override fun render() {
+        val authenticatedUser: MutableState<UserObject?> = koinInject()
         val authProvider = koinInject<Auth>()
         val navProvider = koinInject<NavHostController>()
         val dialogProvider: DialogProvider = koinInject()
@@ -52,7 +56,13 @@ class LoginScreen(override val route: String): ScreenBase(route) {
                     AlertUtils.buildError("Invalid username or password!")
                 }.show()
             } else {
-                navProvider.navigate(AppScreen.WaitersRecordOrder.name)
+                when (authenticatedUser.value?.role) {
+                    UserRole.Admin -> navProvider.navigate(AppScreen.WaitersOrderList.name)
+                    UserRole.Waiters -> navProvider.navigate(AppScreen.WaitersOrderList.name)
+                    UserRole.Chef -> navProvider.navigate(AppScreen.ChefOrderList.name)
+                    UserRole.Cashier -> navProvider.navigate(AppScreen.CashierOrderList.name)
+                    null -> throw IllegalStateException("User role is unknown")
+                }
             }
 
             isSubmitting.value = false
