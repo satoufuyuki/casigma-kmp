@@ -1,7 +1,6 @@
 package dev.pbt.casigma.modules.providers
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import dev.pbt.casigma.modules.database.Database
 import dev.pbt.casigma.modules.database.models.User
 import dev.pbt.casigma.modules.database.models.UserObject
