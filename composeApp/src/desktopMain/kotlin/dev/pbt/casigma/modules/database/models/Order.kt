@@ -10,7 +10,8 @@ import java.time.LocalDateTime
 enum class OrderStatus(val status: String) {
     Pending("pending"),
     Completed("completed"),
-    Cancelled("confirmed")
+    Cancelled("cancelled"),
+    Paid("paid")
 }
 
 object Order : IntIdTable("orders") {
