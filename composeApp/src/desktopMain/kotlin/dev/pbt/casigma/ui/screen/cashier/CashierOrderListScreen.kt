@@ -25,7 +25,6 @@ import dev.pbt.casigma.ui.screen.ScreenBase
 import dev.pbt.casigma.ui.theme.neutral
 import dev.pbt.casigma.ui.theme.white
 import org.koin.compose.koinInject
-import org.koin.core.qualifier.named
 
 class CashierOrderListScreen(override val route: String): ScreenBase(route) {
     @Composable

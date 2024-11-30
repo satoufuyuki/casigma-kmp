@@ -13,9 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import dev.pbt.casigma.AppScreen
-import dev.pbt.casigma.GlobalContext
 import dev.pbt.casigma.modules.database.models.OrderStatus
 import dev.pbt.casigma.modules.providers.DialogProvider
 import dev.pbt.casigma.modules.utils.AlertUtils
@@ -27,7 +24,6 @@ import dev.pbt.casigma.ui.screen.ScreenBase
 import dev.pbt.casigma.ui.theme.neutral
 import dev.pbt.casigma.ui.theme.white
 import org.koin.compose.koinInject
-import org.koin.core.qualifier.named
 
 class ChefOrderListScreen(override val route: String): ScreenBase(route) {
     @Composable
@@ -72,7 +68,7 @@ class ChefOrderListScreen(override val route: String): ScreenBase(route) {
                         "Are you sure you want to cancel this order?",
                         onConfirm = {
                             try {
-                                tableViewModel.cancelOrder(orderId)
+                                tableViewModel.updateOrderStatus(orderId, OrderStatus.Cancelled)
                             } catch (e: Exception) {
                                 dialogProvider.setAlertComponent {
                                     AlertUtils.buildError("Failed to cancel order: ${e.message}")

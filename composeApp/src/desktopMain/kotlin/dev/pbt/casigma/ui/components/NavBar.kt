@@ -2,10 +2,6 @@ package dev.pbt.casigma.ui.components
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.window.FrameWindowScope
@@ -31,7 +27,6 @@ fun MenuBar() {
     val windowScope: FrameWindowScope = koinInject()
     val authenticatedUser = koinInject<MutableState<UserObject?>>()
     val dialogProvider: DialogProvider = koinInject()
-    var isOpen by remember { mutableStateOf(true) }
     val db = koinInject<Database>()
     val navHostController = koinInject<NavHostController>()
 
