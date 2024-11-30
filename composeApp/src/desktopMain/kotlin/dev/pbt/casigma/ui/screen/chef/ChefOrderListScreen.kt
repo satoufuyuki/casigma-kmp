@@ -1,4 +1,4 @@
-package dev.pbt.casigma.ui.screen.waiters
+package dev.pbt.casigma.ui.screen.chef
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -29,43 +29,53 @@ import dev.pbt.casigma.ui.theme.white
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
-class OrderListScreen(override val route: String): ScreenBase(route) {
+class ChefOrderListScreen(override val route: String): ScreenBase(route) {
     @Composable
     @OptIn(ExperimentalLayoutApi::class)
     override fun render() {
         val dialogProvider: DialogProvider = koinInject()
-        val globalManagedOrderId: MutableState<Int?> = koinInject(qualifier = named(GlobalContext.ManagedOrderId))
-        val navHostController: NavHostController = koinInject()
         val tableScrollState = rememberScrollState()
         val tableViewModel = koinInject<TableViewModel>()
         val tables by tableViewModel.tableState.collectAsState()
         val currentActiveOrderId = remember { mutableStateOf<Int?>(null) }
         val currentActiveCategory = remember { mutableStateOf(OrderStatus.Pending) }
-        val orderCategory = listOf(OrderStatus.Pending, OrderStatus.Completed)
+        val orderCategory = listOf(OrderStatus.Pending, OrderStatus.Completed, OrderStatus.Cancelled)
 
         // Initial fetch
         if (tableViewModel.tableState.value.isEmpty()) {
             tableViewModel.fetchOrder(currentActiveCategory.value)
         }
 
-        val manageOrder = { orderId: Int? ->
-            if (orderId != null) {
-                globalManagedOrderId.value = orderId
-                navHostController.navigate(AppScreen.WaitersRecordOrder.name)
-            }
-        }
-
-        val deleteOrder = { orderId: Int? ->
+        val markComplete = { orderId: Int? ->
             if (orderId != null) {
                 dialogProvider.setAlertComponent {
                     AlertUtils.buildPromptDecision(
-                        "Are you sure you want to remove this order?",
+                        "Are you sure you want to complete this order?",
                         onConfirm = {
                             try {
-                                tableViewModel.removeOrder(orderId)
+                                tableViewModel.updateOrderStatus(orderId, OrderStatus.Completed)
                             } catch (e: Exception) {
                                 dialogProvider.setAlertComponent {
-                                    AlertUtils.buildError("Failed to remove order: ${e.message}")
+                                    AlertUtils.buildError("Failed to update order: ${e.message}")
+                                }.show()
+                            }
+                        }
+                    )
+                }.show()
+            }
+        }
+
+        val cancelOrder = { orderId: Int? ->
+            if (orderId != null) {
+                dialogProvider.setAlertComponent {
+                    AlertUtils.buildPromptDecision(
+                        "Are you sure you want to cancel this order?",
+                        onConfirm = {
+                            try {
+                                tableViewModel.cancelOrder(orderId)
+                            } catch (e: Exception) {
+                                dialogProvider.setAlertComponent {
+                                    AlertUtils.buildError("Failed to cancel order: ${e.message}")
                                 }.show()
                             }
                         }
@@ -144,9 +154,13 @@ class OrderListScreen(override val route: String): ScreenBase(route) {
                 modifier = Modifier.fillMaxWidth().fillMaxHeight().background(white)
             ) {
                 OrderDetail(
-                    currentActiveOrderId.value?.let { tables.find { t -> t.id == it } },
-                    buttonAction = { manageOrder(currentActiveOrderId.value) },
-                    deleteAction = { deleteOrder(currentActiveOrderId.value) }
+                    currentActiveOrderId.value?.let { tables.find { table -> it == table.id } },
+                    buttonText = "Mark as Completed",
+                    buttonAction = { markComplete(currentActiveOrderId.value) },
+                    buttonEnabled = currentActiveCategory.value == OrderStatus.Pending,
+                    deleteAction = { cancelOrder(currentActiveOrderId.value) },
+                    deleteText = "Cancel Order",
+                    deleteEnabled = currentActiveCategory.value == OrderStatus.Pending
                 )
             }
         }
