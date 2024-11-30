@@ -48,7 +48,7 @@ fun NewTableDialog(
             shape = RoundedCornerShape(16.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 32.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             ) {
