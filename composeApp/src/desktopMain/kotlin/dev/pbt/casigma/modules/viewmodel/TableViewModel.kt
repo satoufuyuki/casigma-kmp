@@ -1,12 +1,8 @@
 package dev.pbt.casigma.modules.viewmodel
 
-import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import dev.pbt.casigma.modules.database.Database
 import dev.pbt.casigma.modules.database.models.*
-import dev.pbt.casigma.modules.database.models.OrderItem.quantity
-import dev.pbt.casigma.modules.providers.DialogProvider
-import dev.pbt.casigma.modules.utils.AlertUtils
 import dev.pbt.casigma.modules.utils.OrderUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,8 +12,6 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
-import org.koin.compose.koinInject
-import java.util.ArrayList
 
 class TableViewModel(private val db: Database, private val orderUtils: OrderUtils) : ViewModel() {
     private val _tableState = MutableStateFlow<List<OrderObject>>(emptyList())
@@ -116,30 +110,5 @@ class TableViewModel(private val db: Database, private val orderUtils: OrderUtil
                 )
             }
         }
-    }
-
-    // Add a new order
-    fun addOrder(order: OrderObject) {
-        _tableState.value += order
-    }
-
-    // Remove an order by ID
-    fun removeOrder(orderId: Int) {
-        transaction(db.conn) {
-            Order.deleteWhere { Order.id eq orderId }
-            _tableState.value = _tableState.value.filter { it.id != orderId }
-        }
-    }
-
-    // Update an existing order
-    fun updateOrder(updatedOrder: OrderObject) {
-        _tableState.value = _tableState.value.map { order ->
-            if (order.id == updatedOrder.id) updatedOrder else order
-        }
-    }
-
-    // Clear all orders
-    fun clearOrders() {
-        _tableState.value = emptyList()
     }
 }

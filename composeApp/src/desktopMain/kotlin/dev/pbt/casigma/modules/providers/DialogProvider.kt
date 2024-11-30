@@ -1,4 +1,4 @@
-package dev.pbt.casigma.modules.providers;
+package dev.pbt.casigma.modules.providers
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState

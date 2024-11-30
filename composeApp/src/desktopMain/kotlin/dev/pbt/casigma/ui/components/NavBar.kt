@@ -18,7 +18,6 @@ import dev.pbt.casigma.modules.database.models.Order
 import dev.pbt.casigma.modules.database.models.OrderStatus
 import dev.pbt.casigma.modules.database.models.UserObject
 import dev.pbt.casigma.modules.database.models.UserRole
-import dev.pbt.casigma.modules.providers.Auth
 import dev.pbt.casigma.modules.providers.DialogProvider
 import dev.pbt.casigma.modules.utils.AlertUtils
 import org.jetbrains.exposed.sql.and

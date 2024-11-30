@@ -1,8 +1,6 @@
 package dev.pbt.casigma.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,7 +19,6 @@ import androidx.compose.ui.unit.sp
 import dev.pbt.casigma.modules.utils.TextUtils
 import dev.pbt.casigma.ui.theme.primaryLight
 import dev.pbt.casigma.ui.theme.white
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Composable

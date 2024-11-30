@@ -1,10 +1,8 @@
 package dev.pbt.casigma.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,7 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import casigma.composeapp.generated.resources.Res
-import casigma.composeapp.generated.resources.chicken_steak
 import casigma.composeapp.generated.resources.remove
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
@@ -23,7 +20,6 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import dev.pbt.casigma.modules.utils.TextUtils
 import dev.pbt.casigma.ui.theme.white
-import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable

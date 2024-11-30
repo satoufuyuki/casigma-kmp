@@ -3,7 +3,6 @@ package dev.pbt.casigma.modules.viewmodel
 import androidx.lifecycle.ViewModel
 import dev.pbt.casigma.modules.database.Database
 import dev.pbt.casigma.modules.database.models.Menu
-import dev.pbt.casigma.modules.database.models.MenuCategory
 import dev.pbt.casigma.modules.database.models.MenuObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +11,6 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class MenuViewModel(private val db: Database) : ViewModel() {
-
     private val _menus = MutableStateFlow<List<MenuObject>>(emptyList())
     val menus: StateFlow<List<MenuObject>> = _menus.asStateFlow()
 
@@ -34,9 +32,5 @@ class MenuViewModel(private val db: Database) : ViewModel() {
             }
             _menus.value = menuList
         }
-    }
-
-    fun filterMenusByCategory(category: MenuCategory): List<MenuObject> {
-        return _menus.value.filter { it.category == category }
     }
 }

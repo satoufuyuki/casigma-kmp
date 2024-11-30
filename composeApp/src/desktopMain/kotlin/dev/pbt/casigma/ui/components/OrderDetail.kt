@@ -22,9 +22,7 @@ import dev.pbt.casigma.modules.database.models.OrderObject
 import dev.pbt.casigma.modules.utils.TextUtils
 import dev.pbt.casigma.ui.theme.grayWhite
 import dev.pbt.casigma.ui.theme.primaryLight
-import org.koin.compose.koinInject
 
-data class OrderItem(val name: String, val price: Int, val quantity: Int)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
