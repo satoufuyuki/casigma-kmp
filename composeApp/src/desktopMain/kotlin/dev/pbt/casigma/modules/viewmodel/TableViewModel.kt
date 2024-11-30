@@ -18,7 +18,7 @@ class TableViewModel(private val db: Database, private val orderUtils: OrderUtil
     val tableState = _tableState.asStateFlow()
 
     fun saveOrder(orderId: Int) {
-        transaction(db.conn) {
+        transaction(db.connect()) {
             val order = _tableState.value.find { it.id == orderId } ?: throw IllegalArgumentException("Order not found")
             // Check for new items
             order.items.filter { it.id == null }.forEach { item ->
@@ -114,14 +114,14 @@ class TableViewModel(private val db: Database, private val orderUtils: OrderUtil
 
     // Remove an order by ID
     fun removeOrder(orderId: Int) {
-        transaction(db.conn) {
+        transaction(db.connect()) {
             Order.deleteWhere { Order.id eq orderId }
             _tableState.value = _tableState.value.filter { it.id != orderId }
         }
     }
 
     fun updateOrderStatus(orderId: Int, status: OrderStatus) {
-        transaction(db.conn) {
+        transaction(db.connect()) {
             Order.update({
                 Order.id eq orderId
             }) {

@@ -19,7 +19,7 @@ class MenuViewModel(private val db: Database) : ViewModel() {
     }
 
     private fun loadMenus() {
-        transaction(db.conn) {
+        transaction(db.connect()) {
             val menuList = Menu.selectAll().map {
                 MenuObject(
                     id = it[Menu.id].value,

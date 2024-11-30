@@ -18,7 +18,7 @@ class OrderUtils(private val db: Database) {
     fun fetchOrders(status: OrderStatus?): Map<Int, OrderObject> {
         val ordersMap = mutableMapOf<Int, OrderObject>()
 
-        transaction (db.conn) {
+        transaction (db.connect()) {
             val query = Join(
                 Order, OrderItem,
                 onColumn = Order.id, otherColumn = OrderItem.orderId,

@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class Auth(private val db: Database, private val argon2: Argon2, private val authenticatedUser: MutableState<UserObject?>) {
     fun authenticate(username: String, password: String): Boolean {
-        return transaction(db.conn) {
+        return transaction(db.connect()) {
             val user = User.selectAll().where {
                 User.username eq username
             }.firstOrNull()
