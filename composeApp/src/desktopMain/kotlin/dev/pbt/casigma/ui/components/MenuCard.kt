@@ -79,7 +79,7 @@ fun MenuCard(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp)
             ) {
                 IconButton(
-                    onClick = onRemove,
+                    onClick = { onRemove() },
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.remove),
@@ -93,7 +93,7 @@ fun MenuCard(
                     color = Color.Black
                 )
                 IconButton(
-                    onClick = onAdd,
+                    onClick = { onAdd() },
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
