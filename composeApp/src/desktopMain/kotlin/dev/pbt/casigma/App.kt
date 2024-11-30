@@ -2,6 +2,7 @@ package dev.pbt.casigma
 
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowScope
@@ -13,12 +14,14 @@ import casigma.composeapp.generated.resources.Res
 import casigma.composeapp.generated.resources.routes_login
 import casigma.composeapp.generated.resources.routes_waiters_order_list_screen
 import casigma.composeapp.generated.resources.routes_waiters_record_order_screen
-import com.apple.eawt.Application
 import dev.pbt.casigma.modules.database.Database
 import dev.pbt.casigma.modules.database.models.UserObject
 import dev.pbt.casigma.modules.providers.Argon2
 import dev.pbt.casigma.modules.providers.Auth
+import dev.pbt.casigma.modules.providers.DialogProvider
 import dev.pbt.casigma.modules.utils.OrderUtils
+import dev.pbt.casigma.modules.viewmodel.MenuViewModel
+import dev.pbt.casigma.modules.viewmodel.TableViewModel
 import dev.pbt.casigma.ui.components.MenuBar
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -32,12 +35,13 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.compose.KoinApplication
 import org.koin.compose.getKoin
 import org.koin.compose.koinInject
-import org.koin.core.component.getScopeId
-import org.koin.core.component.getScopeName
-import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
-import org.koin.core.qualifier.qualifier
 import org.koin.dsl.module
+
+enum class GlobalContext(val variableName: String) {
+    ManagedOrderId("managedOrderId")
+}
 
 enum class AppScreen(val title: StringResource) {
     WaitersOrderList(Res.string.routes_waiters_order_list_screen),
@@ -51,7 +55,14 @@ enum class AppScreen(val title: StringResource) {
 @Preview
 fun App(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
     val navController: NavHostController = rememberNavController()
-    var authenticatedUser: MutableState<UserObject?> = remember { mutableStateOf(null) }
+    val authenticatedUser: MutableState<UserObject?> = remember { mutableStateOf(null) }
+
+    // Dialog Provider
+    val isShown: MutableState<Boolean> = remember { mutableStateOf(false) }
+    val alertComponent: MutableState<(@Composable () -> Unit)?> = remember { mutableStateOf(null) }
+
+    // Global context
+    val globalManagedOrderId = remember { mutableStateOf<Int?>(null) }
 
     KoinApplication(application = {
         val mainModules = module {
@@ -59,23 +70,33 @@ fun App(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
             single { authenticatedUser }
             single { Argon2() }
             single { Database() }
+            single { DialogProvider(isShown, alertComponent) }
             factory { Auth(get(), get(), get()) }
             factory { OrderUtils(get()) }
+
+            // View models
+            viewModel { MenuViewModel(get()) }
+            viewModel { TableViewModel(get(), get()) }
+
+            // Global context
+            single(named(GlobalContext.ManagedOrderId)) { globalManagedOrderId }
         }
 
         val screens = module {
             factory<ScreenBase>(named(AppScreen.Login)) { LoginScreen(AppScreen.Login.name) }
             factory<ScreenBase>(named(AppScreen.WaitersOrderList)) { OrderListScreen(AppScreen.WaitersOrderList.name) }
-            factory<ScreenBase>(named(AppScreen.WaitersRecordOrder)) { RecordOrderScreen(
-                AppScreen.WaitersRecordOrder.name,
-                get(),
-                get()
-            ) }
+            factory<ScreenBase>(named(AppScreen.WaitersRecordOrder)) {
+                RecordOrderScreen(
+                    AppScreen.WaitersRecordOrder.name,
+                )
+            }
         }
 
         modules(mainModules, screens)
     }) {
         val koin = getKoin()
+        val dialogProvider: DialogProvider = koinInject()
+
         AppTheme {
             Scaffold(
                 topBar = {
@@ -84,6 +105,10 @@ fun App(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
                     }
                 }
             ) {
+                if (dialogProvider.isShown.value) {
+                    dialogProvider.render()
+                }
+
                 MenuBar(windowScope, applicationScope)
                 NavHost(navController = navController, startDestination = AppScreen.Login.name) {
                     AppScreen.entries.forEach {
