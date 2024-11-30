@@ -1,67 +1,90 @@
 package dev.pbt.casigma.ui.components
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import dev.pbt.casigma.ui.theme.primaryLight
+import dev.pbt.casigma.ui.theme.white
 
 @Composable
-fun Alert(
+fun AlertDialog(
     onDismissRequest: (() -> Unit)? = null,
     onConfirmation: (() -> Unit)? = null,
     dismissText: @Composable (() -> Unit)? = null,
     confirmText: @Composable (() -> Unit)? = null,
     dialogTitle: String,
     dialogText: String,
-    icon: ImageVector? = null
 ) {
-    return AlertDialog(
-        icon = {
-            if (icon != null) {
-                Icon(imageVector = icon, contentDescription = null)
-            }
-        },
-        title = {
-            Text(text = dialogTitle)
-        },
-        text = {
-            Text(text = dialogText)
-        },
-        onDismissRequest = {
-            onDismissRequest?.invoke()
-        },
-        confirmButton = {
-            if (confirmText != null) {
-                TextButton(
-                    onClick = {
-                        onConfirmation?.invoke()
+    return Dialog(
+        onDismissRequest = onDismissRequest ?: {},
+    ) {
+        Card(
+            modifier = Modifier,
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            ) {
+                Text(
+                    text = dialogTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start
+                )
+                Text(
+                    text = dialogText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)
+                ) {
+                    if (dismissText != null) {
+                        TextButton(
+                            colors = ButtonDefaults.textButtonColors()
+                                .copy(
+                                    contentColor = Color.Gray
+                                ),
+                            onClick = {
+                                onDismissRequest?.invoke()
+                            }
+                        ) {
+                            dismissText()
+                        }
                     }
-                ) {
-                    confirmText()
-                }
-            }
-        },
-        dismissButton = {
-            if (dismissText != null) {
-                TextButton(
-                    onClick = {
-                        onDismissRequest?.invoke()
-                    },
-                    colors = ButtonDefaults.buttonColors().copy(
-                        contentColor = Color.Black,
-                        containerColor = Color.Transparent,
-                    )
-                ) {
-                    dismissText()
+                    if (confirmText != null) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors()
+                                .copy(
+                                    contentColor = Color.White,
+                                    containerColor = primaryLight
+                                ),
+                            onClick = {
+                                onConfirmation?.invoke()
+                            }
+                        ) {
+                            confirmText()
+                        }
+                    }
                 }
             }
         }
-    )
+    }
 }
