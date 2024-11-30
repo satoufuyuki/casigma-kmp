@@ -8,22 +8,29 @@ import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
 import androidx.navigation.NavHostController
 import dev.pbt.casigma.AppScreen
+import dev.pbt.casigma.GlobalContext
 import dev.pbt.casigma.modules.database.Database
 import dev.pbt.casigma.modules.database.models.Order
 import dev.pbt.casigma.modules.database.models.OrderStatus
 import dev.pbt.casigma.modules.database.models.UserObject
 import dev.pbt.casigma.modules.database.models.UserRole
+import dev.pbt.casigma.modules.datastore.SettingRepository
 import dev.pbt.casigma.modules.providers.DialogProvider
 import dev.pbt.casigma.modules.utils.AlertUtils
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MenuBar() {
+    val globalDatabaseConnected = koinInject<MutableState<Boolean>>(qualifier = named(GlobalContext.DatabaseConnected))
+    val globalLastDatabaseError = koinInject<MutableState<String?>>(qualifier = named(GlobalContext.LastDatabaseError))
+    val settingRepository: SettingRepository = koinInject()
+
     val windowScope: FrameWindowScope = koinInject()
     val authenticatedUser = koinInject<MutableState<UserObject?>>()
     val dialogProvider: DialogProvider = koinInject()
@@ -40,9 +47,9 @@ fun MenuBar() {
                 }.show()
             }.show()
         } else {
-            transaction(db.conn) {
+            transaction(db.connect()) {
                 val existingTable = Order.select(Order.id)
-                    .where { (Order.tableNo eq tableNo) and (Order.status neq OrderStatus.Completed) }.count()
+                    .where { (Order.tableNo eq tableNo) and (Order.status eq OrderStatus.Pending) }.count()
                 if (existingTable > 0) {
                     dialogProvider.setAlertComponent {
                         AlertUtils.buildError(
@@ -104,6 +111,33 @@ fun MenuBar() {
                     }
                 })
             }
+            Item("Settings", onClick = {
+                dialogProvider.setAlertComponent { SettingDialog(
+                    onDismiss = {},
+                    onConfirm = { dbDriver, dbUrl, dbUsername, dbPassword ->
+                        settingRepository.setDbUrl(dbUrl)
+                        settingRepository.setDbDriver(dbDriver)
+                        settingRepository.setDbUsername(dbUsername)
+                        settingRepository.setDbPassword(dbPassword)
+
+                        try {
+                            db.connect()
+                            globalDatabaseConnected.value = true
+                            if (globalLastDatabaseError.value != null) throw Exception(globalLastDatabaseError.value)
+                            dialogProvider.setAlertComponent {
+                                AlertUtils.buildSuccess("Database connection successful!")
+                            }.show()
+                        } catch (e: Exception) {
+                            globalDatabaseConnected.value = false
+                            globalLastDatabaseError.value = e.message
+
+                            dialogProvider.setAlertComponent {
+                                AlertUtils.buildError("Database connection failed! (Last error: ${e.message})")
+                            }.show()
+                        }
+                    }
+                ) }.show()
+            })
             Item("Exit", onClick = {
                 dialogProvider.setAlertComponent {
                     AlertUtils.buildPromptDecision(

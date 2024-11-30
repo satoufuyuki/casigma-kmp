@@ -1,21 +1,39 @@
 package dev.pbt.casigma.modules.database
 
+import androidx.compose.runtime.MutableState
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import javax.sql.DataSource
+import dev.pbt.casigma.modules.datastore.SettingRepository
 
-class Database {
-    var db: DataSource = connect();
-    val conn = org.jetbrains.exposed.sql.Database.connect(db)
+class Database(private val settingRepository: SettingRepository, private val lastDatabaseError: MutableState<String?>, private val databaseConnected: MutableState<Boolean>) {
+    fun connect(): org.jetbrains.exposed.sql.Database? {
+        lastDatabaseError.value = null
+        try {
+            Class.forName(settingRepository.dbDriver)
+        } catch (e: ClassNotFoundException) {
+            lastDatabaseError.value = "Database driver not found"
+            e.printStackTrace()
+        }
 
-    private fun connect(): DataSource {
-        val config = HikariConfig()
-        config.jdbcUrl = "jdbc:mysql://localhost:3306/casigma_kmp"
-        config.username = "root"
-        config.password = ""
-        config.driverClassName = "com.mysql.cj.jdbc.Driver"
+        try {
+            val config = HikariConfig()
+            config.jdbcUrl = settingRepository.dbUrl
+            config.username = settingRepository.dbUsername
+            config.password = settingRepository.dbPassword
+            config.driverClassName = settingRepository.dbDriver
 
-        return HikariDataSource(config)
+            val dataSource = HikariDataSource(config)
+            val connection = org.jetbrains.exposed.sql.Database.connect(dataSource)
 
+            if (dataSource.connection.isValid(5)) databaseConnected.value = true
+            else throw Exception("Database connection failed (5s timeout exceededx)")
+
+            return connection
+        } catch (e: Exception) {
+            e.printStackTrace()
+            lastDatabaseError.value = e.message
+        }
+
+        return null
     }
 }

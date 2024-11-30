@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import dev.pbt.casigma.AppScreen
+import dev.pbt.casigma.GlobalContext
 import dev.pbt.casigma.modules.database.models.UserObject
 import dev.pbt.casigma.modules.database.models.UserRole
 import dev.pbt.casigma.modules.providers.Auth
@@ -37,10 +38,12 @@ import dev.pbt.casigma.ui.theme.neutral
 import dev.pbt.casigma.ui.theme.primaryLight
 import dev.pbt.casigma.ui.theme.white
 import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
 
 class LoginScreen(override val route: String): ScreenBase(route) {
     @Composable
     override fun render() {
+        val globalDatabaseConnected = koinInject<MutableState<Boolean>>(qualifier = named(GlobalContext.DatabaseConnected))
         val authenticatedUser: MutableState<UserObject?> = koinInject()
         val authProvider = koinInject<Auth>()
         val navProvider = koinInject<NavHostController>()
@@ -50,6 +53,13 @@ class LoginScreen(override val route: String): ScreenBase(route) {
         val password = remember { mutableStateOf("") }
 
         fun handleLogin() {
+            if (!globalDatabaseConnected.value) {
+                dialogProvider.setAlertComponent {
+                    AlertUtils.buildError("Database is not connected! (Last error: ${koinInject<MutableState<String?>>(qualifier = named(GlobalContext.LastDatabaseError)).value})")
+                }.show()
+                return
+            }
+
             isSubmitting.value = true
             if (!authProvider.authenticate(username.value, password.value)) {
                 dialogProvider.setAlertComponent {
