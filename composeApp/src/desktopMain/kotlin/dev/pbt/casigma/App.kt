@@ -53,7 +53,7 @@ enum class AppScreen(val title: StringResource) {
 
 @Composable
 @Preview
-fun App(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
+fun App(windowScope: FrameWindowScope) {
     val navController: NavHostController = rememberNavController()
     val authenticatedUser: MutableState<UserObject?> = remember { mutableStateOf(null) }
 
@@ -66,6 +66,7 @@ fun App(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
 
     KoinApplication(application = {
         val mainModules = module {
+            single { windowScope}
             single { navController }
             single { authenticatedUser }
             single { Argon2() }
@@ -109,7 +110,7 @@ fun App(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
                     dialogProvider.render()
                 }
 
-                MenuBar(windowScope, applicationScope)
+                MenuBar()
                 NavHost(navController = navController, startDestination = AppScreen.Login.name) {
                     AppScreen.entries.forEach {
                         val screen = koin.get<ScreenBase>(qualifier = named(it))

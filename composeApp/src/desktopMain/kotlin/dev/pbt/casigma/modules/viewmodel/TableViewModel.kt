@@ -111,4 +111,12 @@ class TableViewModel(private val db: Database, private val orderUtils: OrderUtil
             }
         }
     }
+
+    // Remove an order by ID
+    fun removeOrder(orderId: Int) {
+        transaction(db.conn) {
+            Order.deleteWhere { Order.id eq orderId }
+            _tableState.value = _tableState.value.filter { it.id != orderId }
+        }
+    }
 }

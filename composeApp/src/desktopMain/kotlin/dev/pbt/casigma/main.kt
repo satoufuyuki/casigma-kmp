@@ -15,6 +15,6 @@ fun main() = application {
         resizable = false,
 //        undecorated = true
     ) {
-        App(this, this@application)
+        App(this)
     }
 }

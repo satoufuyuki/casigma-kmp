@@ -27,16 +27,16 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun MenuBar(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
+fun MenuBar() {
+    val windowScope: FrameWindowScope = koinInject()
     val newTableDialogShown = remember { mutableStateOf(false) }
     val authenticatedUser = koinInject<MutableState<UserObject?>>()
     val dialogProvider: DialogProvider = koinInject()
-
     var action by remember { mutableStateOf("Last action: None") }
     var isOpen by remember { mutableStateOf(true) }
     var isSubmenuShowing by remember { mutableStateOf(false) }
     val db = koinInject<Database>()
-    var navHostController = koinInject<NavHostController>()
+    val navHostController = koinInject<NavHostController>()
 
     fun handleNewTable(tableNo: Int, customerName: String, additionalNotes: String?) {
         newTableDialogShown.value = false
