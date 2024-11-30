@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import casigma.composeapp.generated.resources.*
 import casigma.composeapp.generated.resources.Res
 import casigma.composeapp.generated.resources.routes_login
 import casigma.composeapp.generated.resources.routes_waiters_order_list_screen
@@ -25,6 +26,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import dev.pbt.casigma.ui.components.TopBar
 import dev.pbt.casigma.ui.screen.LoginScreen
 import dev.pbt.casigma.ui.screen.ScreenBase
+import dev.pbt.casigma.ui.screen.cashier.CashierOrderListScreen
+import dev.pbt.casigma.ui.screen.chef.ChefOrderListScreen
 import dev.pbt.casigma.ui.theme.AppTheme
 import dev.pbt.casigma.ui.screen.waiters.OrderListScreen
 import dev.pbt.casigma.ui.screen.waiters.RecordOrderScreen
@@ -44,6 +47,9 @@ enum class AppScreen(val title: StringResource) {
     WaitersOrderList(Res.string.routes_waiters_order_list_screen),
     WaitersRecordOrder(Res.string.routes_waiters_record_order_screen),
 
+    ChefOrderList(Res.string.routes_chef_order_list_screen),
+
+    CashierOrderList(Res.string.routes_cashier_order_list_screen),
     Login(Res.string.routes_login)
 }
 
@@ -83,11 +89,9 @@ fun App(windowScope: FrameWindowScope) {
         val screens = module {
             factory<ScreenBase>(named(AppScreen.Login)) { LoginScreen(AppScreen.Login.name) }
             factory<ScreenBase>(named(AppScreen.WaitersOrderList)) { OrderListScreen(AppScreen.WaitersOrderList.name) }
-            factory<ScreenBase>(named(AppScreen.WaitersRecordOrder)) {
-                RecordOrderScreen(
-                    AppScreen.WaitersRecordOrder.name,
-                )
-            }
+            factory<ScreenBase>(named(AppScreen.WaitersRecordOrder)) { RecordOrderScreen(AppScreen.WaitersRecordOrder.name) }
+            factory<ScreenBase>(named(AppScreen.ChefOrderList)) { ChefOrderListScreen(AppScreen.ChefOrderList.name) }
+            factory<ScreenBase>(named(AppScreen.CashierOrderList)) { CashierOrderListScreen(AppScreen.CashierOrderList.name) }
         }
 
         modules(mainModules, screens)
