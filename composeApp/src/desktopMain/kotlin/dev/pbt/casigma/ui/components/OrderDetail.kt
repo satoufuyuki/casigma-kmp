@@ -9,10 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,23 +18,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.pbt.casigma.modules.database.models.OrderObject
+import dev.pbt.casigma.modules.utils.TextUtils
 import dev.pbt.casigma.ui.theme.grayWhite
 import dev.pbt.casigma.ui.theme.primaryLight
+import org.koin.compose.koinInject
 
 data class OrderItem(val name: String, val price: Int, val quantity: Int)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun OrderDetail() {
-    val scrollState = rememberScrollState()
+fun OrderDetail(
+    orderData: OrderObject? = null,
+    buttonAction: () -> Unit,
+    deleteAction: (() -> Unit)? = null
+) {
+    val itemScrollState = rememberScrollState()
     val notesScrollState = rememberScrollState()
-    val orderList = listOf(
-        OrderItem("Chicken Steak", 15000, 1),
-        OrderItem("Ice Tea", 5000, 2),
-        OrderItem("Apple Pie", 10000, 1),
-        OrderItem("Fried Rice", 12000, 1),
-        OrderItem("Mineral Water", 3000, 2),
-    )
 
     return Column (
         verticalArrangement = Arrangement.SpaceBetween,
@@ -72,7 +69,7 @@ fun OrderDetail() {
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        "2021-10-10",
+                        if (orderData != null) TextUtils.formatDate(orderData.createdAt) else "N/A",
                         style = MaterialTheme.typography.bodyMedium,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Medium
@@ -89,7 +86,7 @@ fun OrderDetail() {
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        "13:00 WIB",
+                        if (orderData != null) TextUtils.formatTime(orderData.createdAt) else "N/A",
                         style = MaterialTheme.typography.bodyMedium,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Medium
@@ -106,7 +103,7 @@ fun OrderDetail() {
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        "Muhammad Raymond",
+                        if (orderData != null) orderData.customerName else "N/A",
                         style = MaterialTheme.typography.bodyMedium,
                         fontSize = 20.sp,
                         overflow = TextOverflow.Ellipsis,
@@ -120,21 +117,21 @@ fun OrderDetail() {
             FlowColumn (
                 verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 overflow = FlowColumnOverflow.Clip,
-                modifier = Modifier.fillMaxWidth().height(120.dp).verticalScroll(scrollState),
+                modifier = Modifier.fillMaxWidth().height(120.dp).verticalScroll(itemScrollState),
             ) {
-                orderList.forEach { item ->
+                orderData?.items?.filter { (it.quantity != 0) and (it.quantity != null) }?.forEach { item ->
                     Row (
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            "${item.quantity}x ${item.name}",
+                            "${item.quantity}x ${item.menu.name}",
                             style = MaterialTheme.typography.bodyMedium,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
-                            "Rp${item.price * item.quantity}",
+                            TextUtils.formatRupiah(item.menu.price * (item.quantity ?: 0)),
                             style = MaterialTheme.typography.bodyMedium,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Medium
@@ -167,7 +164,7 @@ fun OrderDetail() {
                         overflow = FlowRowOverflow.Clip
                     ) {
                         Text(
-                            "No additional notes",
+                            orderData?.additionalNotes ?: "N/A",
                             style =  MaterialTheme.typography.bodyMedium,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Medium,
@@ -205,14 +202,14 @@ fun OrderDetail() {
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    "Rp 50.000",
+                    if (orderData != null) TextUtils.formatRupiah(orderData.items.map { (it.quantity ?: 0) * it.menu.price }.sum()) else TextUtils.formatRupiah(0f),
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = buttonAction,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -223,6 +220,23 @@ fun OrderDetail() {
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(12.dp)
                 )
+            }
+            if (deleteAction != null) {
+                Button(
+                    onClick = { deleteAction.invoke() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Red),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        "Delete Order",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
             }
         }
     }
