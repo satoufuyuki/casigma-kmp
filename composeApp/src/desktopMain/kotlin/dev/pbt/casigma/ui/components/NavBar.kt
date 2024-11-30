@@ -19,6 +19,8 @@ import dev.pbt.casigma.modules.database.models.OrderStatus
 import dev.pbt.casigma.modules.database.models.UserObject
 import dev.pbt.casigma.modules.database.models.UserRole
 import dev.pbt.casigma.modules.providers.Auth
+import dev.pbt.casigma.modules.providers.DialogProvider
+import dev.pbt.casigma.modules.utils.AlertUtils
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -28,12 +30,9 @@ import org.koin.compose.koinInject
 @Composable
 fun MenuBar(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
     val newTableDialogShown = remember { mutableStateOf(false) }
-    val errorDialogShown = remember { mutableStateOf(false) }
-    val errorDialogMessage = remember { mutableStateOf("") }
-    val successDialogShown = remember { mutableStateOf(false) }
-    val successDialogMessage = remember { mutableStateOf("") }
-
     val authenticatedUser = koinInject<MutableState<UserObject?>>()
+    val dialogProvider: DialogProvider = koinInject()
+
     var action by remember { mutableStateOf("Last action: None") }
     var isOpen by remember { mutableStateOf(true) }
     var isSubmenuShowing by remember { mutableStateOf(false) }
@@ -45,8 +44,14 @@ fun MenuBar(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
         transaction(db.conn) {
             val existingTable = Order.select(Order.id).where { (Order.tableNo eq tableNo) and (Order.status neq OrderStatus.Completed) }.count()
             if (existingTable > 0) {
-                errorDialogMessage.value = "Table $tableNo is already occupied"
-                errorDialogShown.value = true
+                dialogProvider.setAlertComponent {
+                    AlertUtils.buildError(
+                        "Table $tableNo is already occupied",
+                        onDismiss = {
+                            newTableDialogShown.value = true
+                        }
+                    )
+                }.show()
             } else {
                 Order.insert {
                     it[Order.tableNo] = tableNo
@@ -55,37 +60,31 @@ fun MenuBar(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
                     it[Order.additionalNotes] = additionalNotes ?: "No additional notes"
                 }
 
-                successDialogMessage.value = "Table $tableNo has been successfully recorded"
-                successDialogShown.value = true
+                dialogProvider.setAlertComponent {
+                    AlertUtils.buildSuccess(
+                        "Table $tableNo has been successfully added",
+                    )
+                }.show()
                 navHostController.navigate(AppScreen.WaitersRecordOrder.name)
             }
         }
     }
 
     windowScope.MenuBar {
-        if (errorDialogShown.value) {
-            Alert(
-                onDismissRequest = { errorDialogShown.value = false; errorDialogMessage.value = ""; newTableDialogShown.value = true },
-                dialogTitle = "Error",
-                dialogText = errorDialogMessage.value
-            )
-        }
-
-        if (successDialogShown.value) {
-            Alert(
-                onDismissRequest = { successDialogShown.value = false; successDialogMessage.value = "" },
-                dialogTitle = "Success",
-                dialogText = successDialogMessage.value
-            )
-        }
-
         if (newTableDialogShown.value) {
             NewTableDialog(onDismiss = {
                 newTableDialogShown.value = false
             }, onConfirm = { tableNo, customerName, additionalNotes ->
                 if (tableNo == null || customerName == null || tableNo <= 0 || customerName.isEmpty()) {
-                    errorDialogMessage.value = "Table number and customer name must be properly provided"
-                    errorDialogShown.value = true
+                    dialogProvider.setAlertComponent {
+                        dialogProvider.setAlertComponent { AlertUtils.buildError(
+                            "Table number and customer name must be properly provided",
+                            onDismiss = {
+                                dialogProvider.dismiss()
+                                newTableDialogShown.value = true
+                            }
+                        ) }.show()
+                    }.show()
                 } else {
                     handleNewTable(tableNo, customerName, additionalNotes)
                 }
@@ -97,6 +96,9 @@ fun MenuBar(windowScope: FrameWindowScope, applicationScope: ApplicationScope) {
                     Menu("Orders", mnemonic = 'O') {
                         Item("Record Order", onClick = {
                             newTableDialogShown.value = true
+                        })
+                        Item("View Orders", onClick = {
+                            navHostController.navigate(AppScreen.WaitersOrderList.name)
                         })
                     }
                 }
