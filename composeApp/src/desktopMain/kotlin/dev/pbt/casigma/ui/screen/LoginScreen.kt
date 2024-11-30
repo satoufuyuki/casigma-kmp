@@ -33,7 +33,8 @@ import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import dev.pbt.casigma.AppScreen
 import dev.pbt.casigma.modules.providers.Auth
-import dev.pbt.casigma.ui.components.Alert
+import dev.pbt.casigma.modules.providers.DialogProvider
+import dev.pbt.casigma.modules.utils.AlertUtils
 import dev.pbt.casigma.ui.components.CasigmaLogo
 import dev.pbt.casigma.ui.theme.neutral
 import dev.pbt.casigma.ui.theme.primaryLight
@@ -45,27 +46,17 @@ class LoginScreen(override val route: String): ScreenBase(route) {
     override fun render() {
         val authProvider = koinInject<Auth>()
         val navProvider = koinInject<NavHostController>()
-
-        val isSubmitting = remember {
-            mutableStateOf(false)
-        }
-
-        val username = remember {
-            mutableStateOf("")
-        }
-
-        val password = remember {
-            mutableStateOf("")
-        }
-
-        val alertShown = remember {
-            mutableStateOf(false)
-        }
+        val dialogProvider: DialogProvider = koinInject()
+        val isSubmitting = remember { mutableStateOf(false) }
+        val username = remember { mutableStateOf("") }
+        val password = remember { mutableStateOf("") }
 
         fun handleLogin() {
             isSubmitting.value = true
             if (!authProvider.authenticate(username.value, password.value)) {
-                alertShown.value = true
+                dialogProvider.setAlertComponent {
+                    AlertUtils.buildError("Invalid username or password!")
+                }.show()
             } else {
                 navProvider.navigate(AppScreen.WaitersRecordOrder.name)
             }
@@ -78,14 +69,6 @@ class LoginScreen(override val route: String): ScreenBase(route) {
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth().fillMaxHeight().background(neutral)
         ) {
-            if (alertShown.value) {
-                Alert(
-                    onDismissRequest = { alertShown.value = false },
-                    dismissText = { Text("OK", color = Color.Black) },
-                    dialogTitle = "Error",
-                    dialogText = "Invalid username or password",
-                )
-            }
             Column(
                 verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally,
