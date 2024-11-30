@@ -53,10 +53,11 @@ fun AlertDialog(
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)
                 ) {
                     if (dismissText != null) {
-                        TextButton(
+                        Button(
                             colors = ButtonDefaults.textButtonColors()
                                 .copy(
-                                    contentColor = Color.Gray
+                                    contentColor = Color.Gray,
+                                    containerColor = Color.Transparent
                                 ),
                             onClick = {
                                 onDismissRequest?.invoke()
