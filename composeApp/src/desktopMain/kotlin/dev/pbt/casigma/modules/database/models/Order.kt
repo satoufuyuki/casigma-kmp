@@ -29,8 +29,8 @@ object OrderItem : IntIdTable("order_items") {
 }
 
 data class OrderItemObject(
-    val id: Int,
-    var quantity: Int,
+    val id: Int?, // Null when items are pending
+    var quantity: Int?, // Null when it's marked for deletion
     val menu: MenuObject
 )
 
@@ -41,5 +41,5 @@ data class OrderObject(
     val tableNo: Int,
     val createdAt: LocalDateTime,
     val additionalNotes: String,
-    val items: ArrayList<OrderItemObject>
+    var items: List<OrderItemObject>
 )
