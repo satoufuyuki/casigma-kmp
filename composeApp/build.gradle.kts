@@ -8,7 +8,7 @@ plugins {
 
 kotlin {
     jvm("desktop")
-    
+
     sourceSets {
         val desktopMain by getting
 
@@ -65,9 +65,18 @@ compose.desktop {
         mainClass = "dev.pbt.casigma.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "dev.pbt.casigma"
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
+            packageName = "Casigma"
             packageVersion = "1.0.0"
+            windows {
+                includeAllModules = true
+                shortcut = true
+                menuGroup = "Casigma"
+                perUserInstall = true
+                iconFile.set(
+                    project.file("src/commonMain/composeResources/drawable/icon.ico")
+                )
+            }
         }
     }
 }
