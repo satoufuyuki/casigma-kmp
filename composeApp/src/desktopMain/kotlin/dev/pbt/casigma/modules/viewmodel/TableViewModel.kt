@@ -119,4 +119,23 @@ class TableViewModel(private val db: Database, private val orderUtils: OrderUtil
             _tableState.value = _tableState.value.filter { it.id != orderId }
         }
     }
+
+    fun updateOrderStatus(orderId: Int, status: OrderStatus) {
+        transaction(db.conn) {
+            Order.update({
+                Order.id eq orderId
+            }) {
+                it[Order.status] = status
+            }
+            _tableState.update { orders ->
+                orders.map { order ->
+                    if (order.id == orderId) {
+                        order.copy(status = status)
+                    } else {
+                        order
+                    }
+                }
+            }
+        }
+    }
 }
