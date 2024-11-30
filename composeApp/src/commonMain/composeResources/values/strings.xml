@@ -3,4 +3,6 @@
     <string name="routes_waiters_order_list_screen"/>
     <string name="routes_waiters_record_order_screen"/>
     <string name="routes_login"/>
+    <string name="routes_chef_order_list_screen" />
+    <string name="routes_cashier_order_list_screen" />
 </resources>
