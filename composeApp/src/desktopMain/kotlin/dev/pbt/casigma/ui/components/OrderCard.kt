@@ -18,11 +18,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.pbt.casigma.modules.utils.TextUtils
 import dev.pbt.casigma.ui.theme.primaryLight
 import dev.pbt.casigma.ui.theme.white
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Composable
-fun OrderCard(enabled: Boolean = false, onClick: () -> Unit) {
+fun OrderCard(
+    tableNo: Int,
+    time: LocalDateTime,
+    enabled: Boolean = false,
+    onClick: () -> Unit
+) {
     Button (
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
@@ -40,7 +48,7 @@ fun OrderCard(enabled: Boolean = false, onClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                "Table No. 1",
+                text = "Table $tableNo",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = Color.Gray,
@@ -48,7 +56,7 @@ fun OrderCard(enabled: Boolean = false, onClick: () -> Unit) {
                 modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp)
             )
             Text(
-                "13:00",
+                TextUtils.formatTime(time),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = Color.Gray,
