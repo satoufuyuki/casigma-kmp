@@ -56,7 +56,7 @@ object AlertUtils {
         onDismiss: (() -> Unit)? = null,
         onConfirm: (() -> Unit)? = null,
         confirmText: (@Composable () -> Unit)? = { Text("Confirm", style = MaterialTheme.typography.bodyMedium, color = Color.White) },
-        dismissText: (@Composable () -> Unit)? = { Text("Cancel", style = MaterialTheme.typography.bodyMedium, color = Color.White) },
+        dismissText: (@Composable () -> Unit)? = { Text("Cancel", style = MaterialTheme.typography.bodyMedium, color = Color.Black) },
     ) {
         val dialogProvider: DialogProvider = koinInject()
         AlertDialog(
