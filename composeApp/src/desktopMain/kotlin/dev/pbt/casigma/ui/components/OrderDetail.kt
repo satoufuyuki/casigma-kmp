@@ -28,8 +28,12 @@ import dev.pbt.casigma.ui.theme.primaryLight
 @Composable
 fun OrderDetail(
     orderData: OrderObject? = null,
+    buttonText: String = "Update Order",
     buttonAction: () -> Unit,
-    deleteAction: (() -> Unit)? = null
+    buttonEnabled: Boolean = true,
+    deleteAction: (() -> Unit)? = null,
+    deleteText: String = "Delete Order",
+    deleteEnabled: Boolean = true
 ) {
     val itemScrollState = rememberScrollState()
     val notesScrollState = rememberScrollState()
@@ -101,7 +105,7 @@ fun OrderDetail(
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        if (orderData != null) orderData.customerName else "N/A",
+                        orderData?.customerName ?: "N/A",
                         style = MaterialTheme.typography.bodyMedium,
                         fontSize = 20.sp,
                         overflow = TextOverflow.Ellipsis,
@@ -209,30 +213,44 @@ fun OrderDetail(
             Button(
                 onClick = buttonAction,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors().copy(
+                    containerColor = primaryLight,
+                    contentColor = Color.White,
+                    disabledContainerColor = Color.Gray,
+                    disabledContentColor = Color.White
+                ),
+                enabled = if (orderData == null) false else buttonEnabled
             ) {
                 Text(
-                    "Update Order",
+                    buttonText,
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(12.dp),
+                    color = Color.White
                 )
             }
             if (deleteAction != null) {
                 Button(
                     onClick = { deleteAction.invoke() },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Red),
-                    shape = RoundedCornerShape(12.dp)
+                    colors = ButtonDefaults.buttonColors().copy(
+                        containerColor = Color.Red,
+                        contentColor = Color.White,
+                        disabledContainerColor = Color.Gray,
+                        disabledContentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = if (orderData == null) false else deleteEnabled
                 ) {
                     Text(
-                        "Delete Order",
+                        deleteText,
                         style = MaterialTheme.typography.bodyMedium,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        modifier = Modifier.padding(12.dp)
+                        modifier = Modifier.padding(12.dp),
+                        color = Color.White
                     )
                 }
             }
