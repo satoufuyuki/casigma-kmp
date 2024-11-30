@@ -23,115 +23,134 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.compose.koinInject
+import kotlin.system.exitProcess
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MenuBar() {
     val windowScope: FrameWindowScope = koinInject()
-    val newTableDialogShown = remember { mutableStateOf(false) }
     val authenticatedUser = koinInject<MutableState<UserObject?>>()
     val dialogProvider: DialogProvider = koinInject()
-    var action by remember { mutableStateOf("Last action: None") }
     var isOpen by remember { mutableStateOf(true) }
-    var isSubmenuShowing by remember { mutableStateOf(false) }
     val db = koinInject<Database>()
     val navHostController = koinInject<NavHostController>()
 
-    fun handleNewTable(tableNo: Int, customerName: String, additionalNotes: String?) {
-        newTableDialogShown.value = false
-        transaction(db.conn) {
-            val existingTable = Order.select(Order.id).where { (Order.tableNo eq tableNo) and (Order.status neq OrderStatus.Completed) }.count()
-            if (existingTable > 0) {
+    fun handleNewTable(tableNo: Int?, customerName: String?, additionalNotes: String?) {
+        if (tableNo == null || customerName == null || tableNo <= 0 || customerName.isEmpty()) {
+            dialogProvider.setAlertComponent {
                 dialogProvider.setAlertComponent {
                     AlertUtils.buildError(
-                        "Table $tableNo is already occupied",
-                        onDismiss = {
-                            newTableDialogShown.value = true
+                        "Table number and customer name must be properly provided",
+                    )
+                }.show()
+            }.show()
+        } else {
+            transaction(db.conn) {
+                val existingTable = Order.select(Order.id)
+                    .where { (Order.tableNo eq tableNo) and (Order.status neq OrderStatus.Completed) }.count()
+                if (existingTable > 0) {
+                    dialogProvider.setAlertComponent {
+                        AlertUtils.buildError(
+                            "Table $tableNo is already occupied",
+                            onDismiss = {
+                                dialogProvider.setAlertComponent {
+                                    NewTableDialog(
+                                        onDismiss = {},
+                                        onConfirm = { tableNo, customerName, additionalNotes ->
+                                            handleNewTable(tableNo, customerName, additionalNotes)
+                                        }
+                                    )
+                                }.show()
+                            }
+                        )
+                    }.show()
+                } else {
+                    Order.insert {
+                        it[Order.tableNo] = tableNo
+                        it[Order.customerName] = customerName
+                        it[status] = OrderStatus.Pending
+                        it[Order.additionalNotes] = additionalNotes ?: "No additional notes"
+                    }
+
+                    dialogProvider.setAlertComponent {
+                        AlertUtils.buildSuccess(
+                            "Table $tableNo has been successfully added",
+                        )
+                    }.show()
+                    navHostController.navigate(AppScreen.WaitersRecordOrder.name)
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun newTableDialog () {
+        NewTableDialog(
+            onDismiss = {},
+            onConfirm = { tableNo, customerName, additionalNotes ->
+                handleNewTable(tableNo, customerName, additionalNotes)
+            }
+        )
+    }
+
+
+    windowScope.MenuBar {
+        Menu("Casigma", mnemonic = 'A') {
+            if (authenticatedUser.value !== null) {
+                Item("Logout", onClick = {
+                    dialogProvider.setAlertComponent {
+                        AlertUtils.buildPromptDecision(
+                            "Are you sure you want to logout?",
+                            onConfirm = {
+                                authenticatedUser.value = null
+                                navHostController.navigate(AppScreen.Login.name)
+                            }
+                        )
+                    }
+                })
+            }
+            Item("Exit", onClick = {
+                dialogProvider.setAlertComponent {
+                    AlertUtils.buildPromptDecision(
+                        "Are you sure you want to exit the app?",
+                        onConfirm = {
+                            exitProcess(0)
                         }
                     )
                 }.show()
-            } else {
-                Order.insert {
-                    it[Order.tableNo] = tableNo
-                    it[Order.customerName] = customerName
-                    it[status] = OrderStatus.Pending
-                    it[Order.additionalNotes] = additionalNotes ?: "No additional notes"
-                }
-
-                dialogProvider.setAlertComponent {
-                    AlertUtils.buildSuccess(
-                        "Table $tableNo has been successfully added",
-                    )
-                }.show()
-                navHostController.navigate(AppScreen.WaitersRecordOrder.name)
-            }
-        }
-    }
-
-    windowScope.MenuBar {
-        if (newTableDialogShown.value) {
-            NewTableDialog(onDismiss = {
-                newTableDialogShown.value = false
-            }, onConfirm = { tableNo, customerName, additionalNotes ->
-                if (tableNo == null || customerName == null || tableNo <= 0 || customerName.isEmpty()) {
-                    dialogProvider.setAlertComponent {
-                        dialogProvider.setAlertComponent { AlertUtils.buildError(
-                            "Table number and customer name must be properly provided",
-                            onDismiss = {
-                                dialogProvider.dismiss()
-                                newTableDialogShown.value = true
-                            }
-                        ) }.show()
-                    }.show()
-                } else {
-                    handleNewTable(tableNo, customerName, additionalNotes)
-                }
-            })
+            }, shortcut = KeyShortcut(Key.Escape), mnemonic = 'E')
         }
         if (authenticatedUser.value != null) {
-           when {
-                authenticatedUser.value!!.role == UserRole.Waiters || authenticatedUser.value!!.role == UserRole.Admin -> {
-                    Menu("Orders", mnemonic = 'O') {
-                        Item("Record Order", onClick = {
-                            newTableDialogShown.value = true
-                        })
-                        Item("View Orders", onClick = {
-                            navHostController.navigate(AppScreen.WaitersOrderList.name)
-                        })
-                    }
-                }
-           }
-        }
-        Menu("File", mnemonic = 'F') {
-            Item("Copy", onClick = {}, shortcut = KeyShortcut(Key.C, ctrl = true))
-            Item("Paste", onClick = {}, shortcut = KeyShortcut(Key.V, ctrl = true))
-        }
-        Menu("Actions", mnemonic = 'A') {
-            CheckboxItem(
-                "Advanced settings",
-                checked = isSubmenuShowing,
-                onCheckedChange = {
-                    isSubmenuShowing = !isSubmenuShowing
-                }
-            )
-            if (isSubmenuShowing) {
-                Menu("Settings") {
-                    Item("Setting 1", onClick = { action = "Last action: Setting 1" })
-                    Item("Setting 2", onClick = { action = "Last action: Setting 2" })
+            if (authenticatedUser.value!!.role == UserRole.Waiters || authenticatedUser.value!!.role == UserRole.Admin) {
+                Menu("Orders", mnemonic = 'O') {
+                    Item("New", onClick = {
+                        dialogProvider.setAlertComponent { newTableDialog() }.show()
+                    })
+                    Item("Menu", onClick = {
+                        navHostController.navigate(AppScreen.WaitersRecordOrder.name)
+                    })
+                    Item("View Orders", onClick = {
+                        navHostController.navigate(AppScreen.WaitersOrderList.name)
+                    })
                 }
             }
-            Separator()
-            Item("About", icon = AboutIcon, onClick = { action = "Last action: About" })
-            Item("Exit", onClick = { isOpen = false }, shortcut = KeyShortcut(Key.Escape), mnemonic = 'E')
+
+            if (authenticatedUser.value!!.role == UserRole.Chef || authenticatedUser.value!!.role == UserRole.Admin) {
+                Menu("Chef", mnemonic = 'C') {
+                    Item("View Orders", onClick = {
+                        navHostController.navigate(AppScreen.ChefOrderList.name)
+                    })
+                }
+            }
+
+            if (authenticatedUser.value!!.role == UserRole.Cashier || authenticatedUser.value!!.role == UserRole.Admin) {
+                Menu("Cashier", mnemonic = 'C') {
+                    Item("View Orders", onClick = {
+                        navHostController.navigate(AppScreen.CashierOrderList.name)
+                    })
+                }
+            }
         }
     }
 
-}
-
-object AboutIcon : Painter() {
-    override val intrinsicSize = Size(256f, 256f)
-
-    override fun DrawScope.onDraw() {
-        drawOval(Color(0xFFFFA500))
-    }
 }
