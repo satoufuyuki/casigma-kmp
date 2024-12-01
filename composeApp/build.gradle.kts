@@ -76,6 +76,7 @@ compose.desktop {
                 iconFile.set(
                     project.file("src/commonMain/composeResources/drawable/icon.ico")
                 )
+                upgradeUuid = "b95a37e5-d23b-47d7-b627-00678a3944f0"
             }
         }
     }

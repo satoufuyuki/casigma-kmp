@@ -112,7 +112,7 @@ fun MenuBar() {
                                 navHostController.navigate(AppScreen.Login.name)
                             }
                         )
-                    }
+                    }.show()
                 })
             }
             Item("Settings", onClick = {
