@@ -67,7 +67,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
             packageName = "Casigma"
-            packageVersion = "1.1.2"
+            packageVersion = "1.1.3"
             windows {
                 includeAllModules = true
                 shortcut = true
