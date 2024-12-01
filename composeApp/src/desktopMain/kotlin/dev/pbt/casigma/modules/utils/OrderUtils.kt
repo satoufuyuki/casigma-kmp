@@ -8,6 +8,7 @@ import dev.pbt.casigma.modules.database.models.OrderItem
 import dev.pbt.casigma.modules.database.models.OrderItemObject
 import dev.pbt.casigma.modules.database.models.OrderObject
 import dev.pbt.casigma.modules.database.models.OrderStatus
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Join
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.ResultRow
@@ -36,7 +37,7 @@ class OrderUtils(private val db: Database) {
 
             res.forEach {
                 val orderId = it[Order.id].value
-                if (it[Menu.id] != null) {
+                if ((it[Menu.id] as EntityID<Int>?)?.value != null) {
                     val menuItem = MenuObject(
                         id = it[Menu.id].value,
                         name = it[Menu.name],
