@@ -21,9 +21,9 @@ enum class MenuCategory(val category: String) {
 }
 
 object Menu : IntIdTable("menus") {
-    val name = varchar("name", 50)
+    val name = text("name")
     val price = float("price")
     val category = enumeration("category", MenuCategory::class)
-    val image = varchar("image", 50)
+    val image = varchar("image", 256)
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
 }
