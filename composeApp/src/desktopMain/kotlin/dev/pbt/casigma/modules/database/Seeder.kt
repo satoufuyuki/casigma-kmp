@@ -7,7 +7,6 @@ import dev.pbt.casigma.modules.database.models.User
 import dev.pbt.casigma.modules.database.models.UserRole
 import dev.pbt.casigma.modules.datastore.SettingRepository
 import dev.pbt.casigma.modules.providers.Argon2
-import org.jetbrains.exposed.sql.batchUpsert
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.transactions.transaction
