@@ -57,7 +57,9 @@ fun MenuBar() {
                             onDismiss = {
                                 dialogProvider.setAlertComponent {
                                     NewTableDialog(
-                                        onDismiss = {},
+                                        onDismiss = {
+                                            dialogProvider.dismiss()
+                                        },
                                         onConfirm = { tableNo, customerName, additionalNotes ->
                                             handleNewTable(tableNo, customerName, additionalNotes)
                                         }
@@ -88,7 +90,9 @@ fun MenuBar() {
     @Composable
     fun newTableDialog () {
         NewTableDialog(
-            onDismiss = {},
+            onDismiss = {
+                dialogProvider.dismiss()
+            },
             onConfirm = { tableNo, customerName, additionalNotes ->
                 handleNewTable(tableNo, customerName, additionalNotes)
             }
